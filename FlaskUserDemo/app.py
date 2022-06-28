@@ -21,6 +21,7 @@ def restrict():
 @app.route('/')
 def home():
     return render_template("login.html")
+print("hello")
 
 
 @app.route('/login', methods=['GET', 'POST'])
