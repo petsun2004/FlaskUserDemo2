@@ -47,7 +47,7 @@ def login():
             session['first_name'] = result['first_name']
             session['role'] = result['role']
             session['user_id'] = result['user_id']
-            return redirect("/dashboard")
+            return redirect("/subject_selection")
         else:
             flash("Invalid username or password.")
             return redirect("/login")
@@ -59,6 +59,7 @@ def logout():
     session.clear()
     return redirect('/')
 
+#sign in 
 @app.route('/register', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
@@ -66,9 +67,17 @@ def add_user():
         password = request.form['password']
         encrypted_password = hashlib.sha256(password.encode()).hexdigest()
 
+        if request.files['avatar'].filename:
+            avatar_image = request.files["avatar"]
+            ext = os.path.splitext(avatar_image.filename)[1]
+            avatar_filename = str(uuid.uuid4())[:8] + ext
+            avatar_image.save("static/images/" + avatar_filename)
+        else:
+            avatar_filename = None
+
         with create_connection() as connection:
             with connection.cursor() as cursor:
-                sql = """INSERT INTO users
+                sql = """INSERT INTO user_infor
                     (first_name, last_name, email, password, avatar)
                     VALUES (%s, %s, %s, %s, %s)
                 """
@@ -77,11 +86,13 @@ def add_user():
                     request.form['last_name'],
                     request.form['email'],
                     encrypted_password,
+                    avatar_filename
                 )
                 cursor.execute(sql, values)
                 connection.commit()
         return redirect('/')
     return render_template('users_add.html')
+
 
 @app.route('/dashboard')
 def list_users():
@@ -98,7 +109,7 @@ def list_users():
 def view_user():
     with create_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM user_infor WHERE id=%s", request.args['id'])
+            cursor.execute("SELECT * FROM user_infor WHERE user_id=%s", request.args['user_id'])
             result = cursor.fetchone()
     return render_template('users_view.html', result=result)
 
@@ -106,16 +117,16 @@ def view_user():
 def delete_user():
     with create_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM user_infor WHERE id=%s", request.args['id'])
+            cursor.execute("DELETE FROM user_infor WHERE user_id=%s", request.args['user_id'])
             connection.commit()
     return redirect('/dashboard')
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit_user():
     # Admin are allowed, users with the right id are allowed, everyone else sees 404.
-    if session['role'] != 'admin' and str(session['id']) != request.args['id']:
+    if session['role'] != 'admin' and str(session['user_id']) != request.args['user_id']:
         flash("You don't have permission to edit this user.")
-        return redirect('/view?id=' + request.args['id'])
+        return redirect('/view?user_id=' + request.args['user_id'])
 
     if request.method == 'POST':
         if request.files['avatar'].filename:
@@ -143,17 +154,45 @@ def edit_user():
                     request.form['last_name'],
                     request.form['email'],
                     avatar_filename,
-                    request.form['id']
+                    request.form['user_id']
                 )
                 cursor.execute(sql, values)
                 connection.commit()
-        return redirect('/view?id=' + request.form['id'])
+        return redirect('/view?user_id=' + request.form['user_id'])
     else:
         with create_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM user_infor WHERE id = %s", request.args['id'])
+                cursor.execute("SELECT * FROM user_infor WHERE user_id = %s", request.args['user_id'])
                 result = cursor.fetchone()
         return render_template('users_edit.html', result=result)
+
+
+#student subject selection 
+@app.route('/subject_selection', methods=['GET', 'POST'])
+def subject_selection():
+    if request.method == 'POST':
+
+        with create_connection() as connection:
+            with connection.cursor() as cursor:
+                sql = """INSERT INTO sub_selection
+                    (first_name, last_name,`eng_compolsory`,`math_compolsory`, `sub_3`, `sub_4`,`sub_5` )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                values = (
+                    request.form['first_name'],
+                    request.form['last_name'],
+                    request.form['eng_compolsory'],
+                    request.form['math_compolsory'],
+                    request.form['sub_3'],
+                    request.form['sub_4'],
+                    request.form['sub_5']
+                )
+                cursor.execute(sql, values)
+                connection.commit()
+                return redirect('/')
+    else:
+        return render_template('subject_selection.html')
+
+
 
 
 

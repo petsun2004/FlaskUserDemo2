@@ -43,6 +43,7 @@
     <Content Include="templates\users_edit.html" />
     <Content Include="templates\users_list.html" />
     <Content Include="templates\users_view.html" />
+    <Content Include="templates\subject_selection.html" />
     <Content Include="templates\_layout.html" />
   </ItemGroup>
   <ItemGroup>

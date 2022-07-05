@@ -1,0 +1,30 @@
+{% extends '_layout.html' %}
+
+{% block title %}subject selection{% endblock %}
+
+{% block content %}
+<form method="post">
+    <label for="first_name">First name:</label>
+    <input id="first_name" name="first_name" type="text">
+    <br />
+    <label for="last_name">Last name:</label>
+    <input id="last_name" name="last_name" type="text" />
+    <br />
+    <label for="eng_compolsory">english(compolsory)</label>
+    <input id="eng_compolsory" name="eng_compolsory" type="text" />
+    <br />
+    <label for="math_compolsory">math(compolsory):</label>
+    <input id="math_compolsory" name="math_compolsory" type="text" />
+    <br />
+    <label for="sub3">subject(3):</label>
+    <input id="sub3" name="sub_3" type="text" />
+    <br />
+    <label for="sub4">subject(4):</label>
+    <input id="sub4" name="sub_4" type="text" />
+    <br />
+    <label for="sub5">subject(5)</label>
+    <input id="sub5" name="sub_5" type="text" />
+    <br />
+    <input type="submit" value="submmit">
+</form>
+{% endblock %}
