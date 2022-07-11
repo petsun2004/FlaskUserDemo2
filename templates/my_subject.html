@@ -9,28 +9,17 @@
 
 <table id="subject_id">
     <tr>
-        <th>Name</th>
         <th>subject id</th>
         <th>subject name</th>
-        <th>description</th>
-        <th>teacher_code</th>
-        <th>field</th>
     </tr>
     {% for row in result %}
     <tr>
-        <td> {{row.first_name}} {{row.last_name}} </td>
         <td> {{row.subject_infor_id}} </td>
         <td> {{row.subject_name}} </td>
-        <td>{{row.describtion}} </td>
-        <td>{{row.teacher_code}} </td>
-        <td>{{row.field}} </td>
 
         <td>
-            {% if all %}
-            <a href="{{ url_for('select_sub', id=row.subject_infor_id) }}">select</a>
-            {% else %}
             <a href="/delete_subject?subject_infor_id={{ row.subject_infor_id }}" onclick="return confirm('Are you sure?')">Delete</a>
-            {% endif %}
+        
         </td>
     </tr>
     {%endfor%}

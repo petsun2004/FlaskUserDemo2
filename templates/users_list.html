@@ -10,7 +10,7 @@
         <th>Email</th>
         <th>Actions</th>
     </tr>
-    {% for row in result %}
+    {% for row in user_result %}
     <tr>
         <td>{{ row.first_name }}</td>
         <td>{{ row.last_name }}</td>
@@ -24,4 +24,31 @@
     {% endfor %}
 </table>
 <a href="{{ url_for('add_user') }}">Add a new user</a>
+<table>
+    <tr>
+        <th>subject-name </th>
+        <th>description</th>
+        <th>teacher_code</th>
+        <th>field</th>
+        <th>Actions</th>
+    </tr>
+    {% for row in subject_result %}
+    <tr>
+        <td>{{ row.subject_name }}</td>
+        <td>{{ row.describtion }}</td>
+        <td>{{ row.teacher_code }}</td>
+        <td>{{ row.field }}</td>
+        <td>
+            <a href="/view_subject?subject_infor_id={{ row.subject_infor_id }}">View</a>
+            <a href="/edit_subject?subject_infor_id={{ row.subject_infor_id }}">Edit</a>
+            <a href="/delete_subject?subject_infor_id={{ row.subject_infor_id }}" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{{ url_for('new_subject') }}">Add a new subject</a>
+<br>
+<p>
+    <a href="{{ url_for('selected_subject') }}">view_user_selected_subjects</a>
+</p>
 {% endblock %}

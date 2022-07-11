@@ -12,7 +12,10 @@ def restrict():
         'list_users',
         'view_user',
         'edit_user',
-        'delete_user'
+        'delete_user',
+        'edit_subject',
+        'selected_subject',
+        'select_sub'
     ]
     if 'logged_in' not in session and request.endpoint in restricted_pages:
         flash("You must be logged in to view this page.")
@@ -45,7 +48,7 @@ def add_user():
                 )
                 cursor.execute(sql, values)
                 connection.commit()
-        return redirect('/')
+        return redirect('/dashboard')
     return render_template('users_add.html')
 
 #login 
@@ -94,13 +97,11 @@ def list_users():
         return redirect('/subject')
     with create_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM user_infor")         
-            result = cursor.fetchall()
-    return render_template('users_list.html', result=result)
-
-
-
-
+            cursor.execute("SELECT * FROM user_infor")     
+            user_result = cursor.fetchall()
+            cursor.execute("SELECT * FROM subject_information")     
+            subject_result = cursor.fetchall()
+    return render_template('users_list.html', user_result=user_result, subject_result=subject_result)
 
 @app.route('/view')
 def view_user():
@@ -149,7 +150,91 @@ def edit_user():
                 result = cursor.fetchone()
         return render_template('users_edit.html', result=result)
 
+
+
+
+#subject table on dashboard 
+@app.route('/view_subject')
+def view_subject():
+    with create_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM subject_information WHERE subject_infor_id=%s", request.args['subject_infor_id'])
+            result = cursor.fetchone()
+    return render_template('subject_view.html', result=result)
+
+@app.route('/delete_subject')
+def delete_subject():
+    with create_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM subject_information WHERE subject_infor_id=%s", request.args['subject_infor_id'])
+            connection.commit()
+    return redirect('/dashboard')
+
+@app.route('/edit_subject', methods=['GET', 'POST'])
+def edit_subject():
+    # Admin are allowed, users with the right id are allowed, everyone else sees 404.
+    if session['role'] != 'admin' and str(session['subject_infor_id']) != request.args['subject_infor_id']:
+        flash("You don't have permission to edit this subject.")
+        return redirect('/view_subject?subject_infor_id=' + request.args['subject_infor_id'])
+
+    if request.method == 'POST':
+        with create_connection() as connection:
+            with connection.cursor() as cursor:
+                sql = """UPDATE subject_information SET
+                    subject_name = %s,
+                    describtion = %s,
+                    teacher_code = %s,
+                    field = %s
+                WHERE subject_infor_id = %s"""
+                values = (
+                    request.form['subject_name'],
+                    request.form['describtion'],
+                    request.form['teacher_code'],
+                    request.form['field'],
+                    request.form['subject_infor_id']
+                )
+                cursor.execute(sql, values)
+                connection.commit()
+        return redirect('/dashboard?subject_infor_id=' + request.form['subject_infor_id'])
+    else:
+        with create_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM subject_information WHERE subject_infor_id = %s", request.args['subject_infor_id'])
+                result = cursor.fetchone()
+        return render_template('subject_edit.html', result=result)
+
+
+#add new subject 
+@app.route('/new_subject', methods=['GET', 'POST'])
+def new_subject():
+    if request.method == 'POST':
+        with create_connection() as connection:
+            with connection.cursor() as cursor:
+                sql = """INSERT INTO subject_information
+                    (subject_name, describtion, teacher_code, field)
+                    VALUES (%s, %s, %s, %s)
+                """
+                values = (
+                    request.form['subject_name'],
+                    request.form['describtion'],
+                    request.form['teacher_code'],
+                    request.form['field'],
+                )
+                cursor.execute(sql, values)
+                connection.commit()
+        return redirect('/dashboard')
+    return render_template('subject_add.html')
+
 #user
+# TODO: Add a '/select_subject' route that uses SELECT
+@app.route('/select_sub')
+def select_sub():
+    #add subject into database
+    with create_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO student_and_sub (user_id,subject_id) VALUES (%s, %s)", (session['user_id'],request.args['id']))
+            connection.commit()
+            return redirect('/select_subject')
 
 #subjectPage this page display all the subjects 
 @app.route('/subject')
@@ -158,7 +243,7 @@ def subject():
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM subject_information")
             result = cursor.fetchall()
-    return render_template('subject_selection.html', result=result )
+    return render_template('subject_selection.html', result=result, all=True)
 
 #subjectSelection where the end-user can see the subject they chose  
 @app.route('/select_subject')
@@ -166,9 +251,12 @@ def selected_subject():
     #gets data from database
     with create_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM student_and_sub JOIN user_infor ON user_infor.user_id = student_and_sub.user_id JOIN subject_information ON student_and_sub.subject_id = subject_information.subject_infor_id")
+            if session['role'] != 'admin':
+                cursor.execute("SELECT * FROM student_and_sub JOIN user_infor ON user_infor.user_id = student_and_sub.user_id JOIN subject_information ON student_and_sub.subject_id = subject_information.subject_infor_id WHERE user_infor.user_id = %s", session['user_id'])
+            else:
+                cursor.execute("SELECT * FROM student_and_sub JOIN user_infor ON user_infor.user_id = student_and_sub.user_id JOIN subject_information ON student_and_sub.subject_id = subject_information.subject_infor_id")
             result = cursor.fetchall()
-    return render_template('subject_selection.html', result=result)
+    return render_template('subject_selection.html', result=result, all=False)
 
 
 

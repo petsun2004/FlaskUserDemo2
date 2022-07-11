@@ -1,0 +1,22 @@
+{% extends '_layout.html' %}
+
+{% block title %}Edit profile{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="subject_infor_id" value="{{ result.subject_infor_id }}">
+    <label for="first_name">subject-name:</label>
+    <input id="subject_name" name="subject_name" value="{{ result.subject_name }}">
+    <br>
+    <label for="description">subject description:</label>
+    <input id="describtion" name="describtion" value="{{ result.describtion }}">
+    <br>
+    <label for="teacher_code">teacher_code:</label>
+    <input id="teacher_code" name="teacher_code" value="{{ result.teacher_code }}">
+    <br>
+    <label for="field">field:</label>
+    <input id="field" name="field" value="{{ result.field }}">
+    <br>
+    <input type="submit" value="Save changes">
+</form>
+{% endblock %}

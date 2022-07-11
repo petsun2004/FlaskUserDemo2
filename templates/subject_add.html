@@ -1,0 +1,21 @@
+{% extends '_layout.html' %}
+
+{% block title %}add_new_subject{% endblock %}
+
+{% block content %}
+<form method="post">
+    <label for="subject_name">subject_name:</label>
+    <input id="subject_name" name="subject_name">
+    <br>
+    <label for="describtion">describtion:</label>
+    <input id="describtion" name="describtion">
+    <br>
+    <label for="teacher_code">teacher_code:</label>
+    <input id="teacher_code" name="teacher_code">
+    <br>
+    <label for="field">field:</label>
+    <input id="field" name="field" type="field">
+    <br>
+    <input type="submit" value="new_subject">
+</form>
+{% endblock %}
